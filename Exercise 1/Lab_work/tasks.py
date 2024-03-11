@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import sympy as sp
 
 
 
@@ -119,3 +121,226 @@ def task4():
     
     plot_states(X, "X")
     plot_states(Y, "Y")
+
+
+
+def f123(x):
+    return x**3 - np.cos(5*x)
+
+def task1():
+    segments = [(-1, -0.2), (-0.2, 0.4), (0.4, 1)]
+    colors = ['blue', 'green', 'black']
+    markers = ['x', 'o']
+
+    # a) Nacrtati funkciju f na istom grafiku na segmentima [-1,-0.2], [-0.2,0.4], i [0.4,1]
+    x_values = np.linspace(-1, 1, 400)
+    plt.figure(figsize=(10, 6))
+    plt.plot(x_values, f123(x_values), color='gray', linestyle='-', label='f(x) = x^3 - cos(5x)')
+
+    for i, (start, end) in enumerate(segments):
+        x_values_segment = np.linspace(start, end, 100)
+        plt.plot(x_values_segment, f123(x_values_segment), color=colors[i], linestyle='-', label=f'Segment {i+1}')
+
+    # b) Pronaći minimalnu i maksimalnu vrijednost funkcije f za sve tri zadane segmente
+    for i, (start, end) in enumerate(segments):
+        segment_values = f123(np.linspace(start, end, 100))
+        argmax_idx = np.argmax(segment_values)
+        argmin_idx = np.argmin(segment_values)
+        argmax_x = np.linspace(start, end, 100)[argmax_idx]
+        argmin_x = np.linspace(start, end, 100)[argmin_idx]
+        plt.plot(argmax_x, segment_values[argmax_idx], color='red', marker='o')
+        plt.plot(argmin_x, segment_values[argmin_idx], color='blue', marker='x')
+        plt.text(argmax_x, segment_values[argmax_idx], f'Max: ({argmax_x:.2f}, {segment_values[argmax_idx]:.2f})', fontsize=8, ha='right')
+        plt.text(argmin_x, segment_values[argmin_idx], f'Min: ({argmin_x:.2f}, {segment_values[argmin_idx]:.2f})', fontsize=8, ha='right')
+
+    # c) Analiza
+    plt.title('Graf funkcije f(x) = x^3 - cos(5x)')
+    plt.xlabel('x')
+    plt.ylabel('f(x)')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+
+def f(x1, x2):
+    return 4*x1**2 + x2**2 + 16*x1**2*x2**2
+
+def task2():
+    # Definiranje ograničenja
+    x1_values = np.linspace(-0.5, 0.5, 100)
+    x2_values = np.linspace(-1, 1, 100)
+    X1, X2 = np.meshgrid(x1_values, x2_values)
+    Z = f(X1, X2)
+
+    # a) Nacrtati površ koju funkcija f predstavlja u 3D prostoru sa ograničenjima x1 ∈ [-0.5,0.5] i x2 ∈ [-1,1]
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(X1, X2, Z, cmap='viridis')
+    ax.set_xlabel('x1')
+    ax.set_ylabel('x2')
+    ax.set_zlabel('f(x1, x2)')
+    ax.set_title('3D Površina funkcije f(x1, x2)')
+    plt.show()
+
+    # b) Nacrtati contour plot funkcije f sa zadatim ograničenjima po varijablama
+    plt.figure(figsize=(8, 6))
+    plt.contour(X1, X2, Z, levels=50, cmap='viridis')
+    plt.colorbar()
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('Contour Plot funkcije f(x1, x2)')
+    plt.grid(True)
+    plt.show()
+
+    # c) Nacrtati contour plotove prvih parcijalnih izvoda funkcije f po svim njenim varijablama
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 1)
+    plt.contour(X1, X2, 8*X1 + 32*X1*X2**2, levels=50, cmap='viridis')
+    plt.colorbar()
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('Contour Plot ∂f/∂x1')
+
+    plt.subplot(1, 2, 2)
+    plt.contour(X1, X2, 2*X2 + 32*X1**2*X2, levels=50, cmap='viridis')
+    plt.colorbar()
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('Contour Plot ∂f/∂x2')
+
+    plt.tight_layout()
+    plt.show()
+
+
+def task3():
+    x1, x2 = sp.symbols('x1 x2')
+     # Lets define the fucntion
+    f = x1**2 + 2*x2**2
+
+    # Lets calculate the partial derivatives
+    df_dx1 = sp.diff(f, x1)
+    df_dx2 = sp.diff(f, x2)
+
+    f_func = sp.lambdify((x1, x2), f, 'numpy')
+    df_dx1_func = sp.lambdify((x1, x2), df_dx1, 'numpy')
+    df_dx2_func = sp.lambdify((x1, x2), df_dx2, 'numpy')
+
+    x1_values = np.linspace(-2, 2, 100)
+    x2_values = np.linspace(-2, 2, 100)
+    X1, X2 = np.meshgrid(x1_values, x2_values)
+    
+    # Evaluate function and partial derivatives on grid
+    Z = f_func(X1, X2)
+    df_dx1_values = df_dx1_func(X1, X2)
+    df_dx2_values = df_dx2_func(X1, X2)
+
+
+    # Plot surface plot of the function
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(X1, X2, Z, cmap='viridis')
+    ax.set_xlabel('x1')
+    ax.set_ylabel('x2')
+    ax.set_zlabel('f(x1, x2)')
+    ax.set_title('3D Surface Plot of f(x1, x2)')
+    plt.show()
+
+    # Plot contour plot of the function
+    plt.figure(figsize=(8, 6))
+    plt.imshow(((X1**2+X2**2<=2) & (X1-X2<=1) & (X1>=0)).astype(int), extent=(X1.min(),X1.max(),X2.min(),X2.max()),origin="lower", cmap="Greys", alpha=0.7)
+    plt.contour(X1, X2, Z, levels=50, cmap='viridis')
+    plt.colorbar()
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('Contour Plot of f(x1, x2)')
+    plt.grid(True)
+    plt.show()
+
+    # Plot contour plots of the partial derivatives
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 1)
+    plt.contour(X1, X2, df_dx1_values, levels=50, cmap='viridis')
+    plt.colorbar()
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('Contour Plot of ∂f/∂x1')
+
+    plt.subplot(1, 2, 2)
+    plt.contour(X1, X2, df_dx2_values, levels=50, cmap='viridis')
+    plt.colorbar()
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('Contour Plot of ∂f/∂x2')
+
+    plt.tight_layout()
+    plt.show()
+    # plt.imshow(((X1**2+X2**2<=2) & (X1-X2<=1) & (X1>=0)).astype(int) , extent=(X1.min(),X1.max(),X2.min(),X2.max()),origin="lower", cmap="Greys", alpha = 0.7)
+    # plt.show()
+
+def task5():
+    # Define symbolic variables
+    x1, x2 = sp.symbols('x1 x2')
+
+    # Define the function
+    f = 4*x1**2 + x2**2 + 16*x1**2*x2**2
+
+    # Calculate partial derivatives
+    df_dx1 = sp.diff(f, x1)
+    df_dx2 = sp.diff(f, x2)
+
+    # Convert symbolic expressions to numpy functions
+    f_func = sp.lambdify((x1, x2), f, 'numpy')
+    df_dx1_func = sp.lambdify((x1, x2), df_dx1, 'numpy')
+    df_dx2_func = sp.lambdify((x1, x2), df_dx2, 'numpy')
+
+    # Define grid for plotting
+    x1_values = np.linspace(-0.5, 0.5, 100)
+    x2_values = np.linspace(-1, 1, 100)
+    X1, X2 = np.meshgrid(x1_values, x2_values)
+
+    # Evaluate function and partial derivatives on grid
+    Z = f_func(X1, X2)
+    df_dx1_values = df_dx1_func(X1, X2)
+    df_dx2_values = df_dx2_func(X1, X2)
+
+    # Plot surface plot of the function
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(X1, X2, Z, cmap='viridis')
+    ax.set_xlabel('x1')
+    ax.set_ylabel('x2')
+    ax.set_zlabel('f(x1, x2)')
+    ax.set_title('3D Surface Plot of f(x1, x2)')
+    plt.show()
+
+    # Plot contour plot of the function
+    plt.figure(figsize=(8, 6))
+    plt.contour(X1, X2, Z, levels=50, cmap='viridis')
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('Contour Plot of f(x1, x2)')
+    plt.grid(True)
+    plt.show()
+
+    # Plot contour plots of the partial derivatives
+    plt.figure(figsize=(12, 6))
+    plt.subplot(1, 2, 1)
+    plt.contour(X1, X2, df_dx1_values, levels=50, cmap='viridis')
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('Contour Plot of ∂f/∂x1')
+
+    plt.subplot(1, 2, 2)
+    plt.contour(X1, X2, df_dx2_values, levels=50, cmap='viridis')
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    plt.title('Contour Plot of ∂f/∂x2')
+
+    plt.tight_layout()
+    plt.show()
+    # plt.imshow( ((X1**2+X2**2<=2) & (X1-X2<=1) & (X1>=0)).astype(int) , extent=(X1.min(),X1.max(),X2.min(),X2.max()),origin="lower", cmap="Greys", alpha = 0.7);
+    
+
+
+
+

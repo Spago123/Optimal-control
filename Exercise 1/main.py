@@ -18,4 +18,11 @@ import numpy as np
 
 # ps.task7(18)
 
-lt.task4()
+# lt.task4()
+# lt.task1()
+
+# lt.task2()
+
+# lt.task5()
+
+lt.task3()
