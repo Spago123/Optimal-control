@@ -1,4 +1,5 @@
 import Preperation.tasks as ps
+import Lab_work.tasks as  lt
 import numpy as np
 
 # ps.task1_a()
@@ -16,3 +17,5 @@ import numpy as np
 # ps.task6()
 
 # ps.task7(18)
+
+lt.task4()
