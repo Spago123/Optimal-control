@@ -2,6 +2,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import sympy as sp
+import signal
+
+def solve_with_timeout(eqns, vars, timeout=60):
+    def signal_handler(signum, frame):
+        raise TimeoutError("Timed out")
+
+    signal.signal(signal.SIGALRM, signal_handler)
+    signal.alarm(timeout)
+    try:
+        solutions = sp.solve(eqns, vars, dict=True)
+        return solutions
+    except TimeoutError:
+        print("Solver timed out")
+        return None
+    finally:
+        signal.alarm(0)  # Reset the alarm
 
 def check_if_has_been(solutions, find_var, find_value):
     for sol in solutions:
@@ -123,20 +139,25 @@ def solver(f, ineq_const = None):
         symbolic_list = vars
         for k, v in sol.items():
             symbolic_list = [symbolic_var for symbolic_var in symbolic_list if symbolic_var != k]
+        
+        try:
+            my_sol = solve_with_timeout(new_diff, symbolic_list, 10)
+            # my_sol = sp.solve(new_diff, symbolic_list, dict=True)
+            # my_sol = sp.nsolve(new_diff, symbolic_list, [0, 1, 2, -1, -2], prec=15, tol=1e-4, maxsteps=50)
+            possible_sols.append(my_sol)
+        
+            for s in my_sol:
+                if check_the_solution(s):
+                    solutions.append(s)
+        except Exception as e:
+            pass
 
-        my_sol = sp.solve(new_diff, symbolic_list, dict=True)
-        possible_sols.append(my_sol)
-        
-        for s in my_sol:
-            if check_the_solution(s):
-                solutions.append(s)
-
         
         
-    for po in possible_sols:
-        for p in po:
-            print(p)
-        print("------------------------")
+    # for po in possible_sols:
+    #     for p in po:
+    #         print(p)
+    #     print("------------------------")
         
     for po in solutions:
         print(po)
@@ -172,14 +193,14 @@ def plot_boundries(f, sols, ineq_const=None):
         x_points.append(float(s[x].evalf()))
         y_points.append(float(s[y].evalf()))
         f_points.append(float(s['value'].evalf()))
-        
-    min_x = float(min(x_points))
-    max_x = float(max(x_points))
-        
     
-    
-    x_ = np.linspace(float(min(x_points)) - 1, float(max(x_points)) + 1, 1000)
-    y_ = np.linspace(float(min(y_points)) - 1, float(max(y_points)) + 1, 1000)
+    if len(sols) != 0:
+        x_ = np.linspace(float(min(x_points)) - 1, float(max(x_points)) + 1, 1000)
+        y_ = np.linspace(float(min(y_points)) - 1, float(max(y_points)) + 1, 1000)
+    else:
+        x_ = np.linspace(-5, 5, 1000)
+        y_ = np.linspace(-5, 5, 1000)
+        
     X1, X2 = np.meshgrid(x_, y_)
     Z = f_func(X1, X2)
     
@@ -215,11 +236,19 @@ def plot_boundries(f, sols, ineq_const=None):
 
 
 (x, y) = sp.symbols('x y')
+
 # f = x**2 + 3*y**2
 # ineq_const=[(x**2 + y**2 <= 3), (x + y >= 1), (x >= 0)]
 
-f = x**2 + 3*y**2
-ineq_const=[(x**2 + y**2 <= 0.75), (-x + y <= 0.5), (y >= 0)]
+# f = x**2 + 3*y**2
+# ineq_const=[(x**2 + y**2 <= 4), (x >= 0), (y <= 1)]
+
+# f = (x + 1)**2 + y**2
+# ineq_const=[(x**2 + y**2 <= 0.75), (-x + y <= 0.5), (y >= 0)]
+
+f = (x + 4)**2 + (y + 4)**2
+ineq_const=[(3*x**2 + 0.5*(y - 1)**2 <= 1), (y - x <= 1.5), (y >= 0)]
+
 sols = solver(f, ineq_const)
 plot_boundries(f, sols, ineq_const=ineq_const)
 
