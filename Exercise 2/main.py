@@ -193,7 +193,28 @@ def plot_boundries(f, sols, ineq_const=None):
         x_points.append(float(s[x].evalf()))
         y_points.append(float(s[y].evalf()))
         f_points.append(float(s['value'].evalf()))
+        
+    min_value_data = sols[0]
+    max_value_data = sols[0]
+
+    # Iterate over the list to find min and max values
+    for d in sols:
+        value = d['value']
+        if value < min_value_data['value']:
+            min_value_data = d
+        if value > max_value_data['value']:
+            max_value_data = d
+    print("Max: ")
+    print(max_value_data)
+    print("Min: ")
+    print(min_value_data)
     
+    x_max = float(max_value_data[x].evalf())
+    y_max = float(max_value_data[y].evalf())
+    
+    x_min = float(min_value_data[x].evalf())
+    y_min = float(min_value_data[y].evalf())
+        
     if len(sols) != 0:
         x_ = np.linspace(float(min(x_points)) - 1, float(max(x_points)) + 1, 1000)
         y_ = np.linspace(float(min(y_points)) - 1, float(max(y_points)) + 1, 1000)
@@ -228,6 +249,8 @@ def plot_boundries(f, sols, ineq_const=None):
     plt.contour(X1, X2, Z, levels=50, cmap='viridis')
     plt.colorbar()
     plt.plot(x_points, y_points, 'o', color="red")
+    plt.plot(x_max, y_max, 'o', color="green")
+    plt.plot(x_min, y_min, 'o', color="blue")
     plt.xlabel('x')
     plt.ylabel('y')
     plt.title('Contour Plot of f(x, y)')
@@ -237,8 +260,8 @@ def plot_boundries(f, sols, ineq_const=None):
 
 (x, y) = sp.symbols('x y')
 
-# f = x**2 + 3*y**2
-# ineq_const=[(x**2 + y**2 <= 3), (x + y >= 1), (x >= 0)]
+f = x**2 + 3*y**2
+ineq_const=[(x**2 + y**2 <= 3), (x + y >= 1), (x >= 0)]
 
 # f = x**2 + 3*y**2
 # ineq_const=[(x**2 + y**2 <= 4), (x >= 0), (y <= 1)]
@@ -246,8 +269,8 @@ def plot_boundries(f, sols, ineq_const=None):
 # f = (x + 1)**2 + y**2
 # ineq_const=[(x**2 + y**2 <= 0.75), (-x + y <= 0.5), (y >= 0)]
 
-f = (x + 4)**2 + (y + 4)**2
-ineq_const=[(3*x**2 + 0.5*(y - 1)**2 <= 1), (y - x <= 1.5), (y >= 0)]
+# f = (x + 4)**2 + (y + 4)**2
+# ineq_const=[(3*x**2 + 0.5*(y - 1)**2 <= 1), (y - x <= 1.5), (y >= 0)]
 
 sols = solver(f, ineq_const)
 plot_boundries(f, sols, ineq_const=ineq_const)
